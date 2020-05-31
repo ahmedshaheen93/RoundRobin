@@ -25,6 +25,7 @@ public class ProcessesFrame extends javax.swing.JFrame {
     Process[] processes;
     int numberOfProcesses ;
     int quantum ;
+    
     /**
      * Creates new form ProcessesFrame
      */

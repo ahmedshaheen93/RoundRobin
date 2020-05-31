@@ -5,10 +5,10 @@
  */
 package roundrobin;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Queue;
 
 /**
  *
@@ -16,26 +16,27 @@ import java.util.Map;
  */
 public class RoundRobin extends Scheduler {
 
-    private static int quantum;
-    private static List<Process> listReady = new ArrayList<Process>();
-    private static List<Integer> arrivalTime = new ArrayList<Integer>();
-    private static Map<Integer, Integer> responseTime = new HashMap<Integer, Integer>();
+    private int quantum;
+
+    private Queue<Process> readyQueue = new ArrayDeque<>();
+    private List<Integer> arrivalTime = new ArrayList<Integer>();
+    private List<Interruption> responseTimeList = new ArrayList();
 
     private List<Process> runningProcess = new ArrayList<>();
 
-    private List<Map<Process, Integer>> running = new ArrayList();
+    private List<Interruption> interruptionList = new ArrayList();
 
     private void prepareList(List<Process> process, int returnAux) {
         int min = 0;
 
         for (Process p1 : process) {
             if (!arrivalTime.contains(p1.getArrivalTime()) && p1.getArrivalTime() <= returnAux) {
-                if (!listReady.contains(p1)) {
+                if (!readyQueue.contains(p1)) {
                     min = p1.getArrivalTime();
                     arrivalTime.add(min);
                     for (Process p2 : process) {
                         if (p2.getArrivalTime() == min) {
-                            listReady.add(p2);
+                            readyQueue.add(p2);
                         }
                     }
                 }
@@ -45,8 +46,8 @@ public class RoundRobin extends Scheduler {
 
     private int responseTimeTotal() {
         int sumResposta = 0;
-        for (int key : responseTime.keySet()) {
-            sumResposta += responseTime.get(key);
+        for (Interruption interruption : responseTimeList) {
+            sumResposta += interruption.getTime();
         }
         return sumResposta;
     }
@@ -59,54 +60,38 @@ public class RoundRobin extends Scheduler {
         int totalProcess = super.getAmountOfProcess(processes);
         // arrivalProcess is min arrival time
         // considring the idel time befor arriving
-        int arrivalProcess = arrivalMin(processes);
+        int runningTime = arrivalMin(processes);
 
-        prepareList(processes, arrivalProcess);
+        prepareList(processes, runningTime);
 
-        // enquanto houver processos na lista de prontos
-        while (!listReady.isEmpty()) {
-            Process p = listReady.remove(0);
-
-            // calc responseTime 
-            // if !existing add on map
-            if (!responseTime.containsKey(p.getId())) {
-                int responseingTime = arrivalProcess - p.getArrivalTime();
-                p.setResponseTime(responseingTime);
-
-//                Map<Process, Integer> runningpr = new HashMap<>();
-//                runningpr.put(p, responseingTime);
-//                running.add(runningpr);
-                responseTime.put(p.getId(), responseingTime);
+        while (!readyQueue.isEmpty()) {
+            Process p = readyQueue.poll();
+            Interruption interruption = new Interruption();
+            interruption.setProcess(p);
+            interruption.setTime(runningTime);
+            int responseToProcess = responseToProcess(interruption);
+            if (responseToProcess >= 0) {
+                p.setResponseTime(responseToProcess);
             }
 
             if (p.getRemainingDuration() > quantum) {
                 p.setRemainingDuration(p.getRemainingDuration() - quantum);
-                arrivalProcess += quantum;
-                prepareList(processes, arrivalProcess);
-                Map<Process, Integer> runningpr = new HashMap<>();
-                runningpr.put(p, arrivalProcess);
-                running.add(runningpr);
-                listReady.add(p);
+                runningTime += quantum;
+                interruption.setTime(runningTime);
+                intrruptProcessor(interruption);
+                prepareList(processes, runningTime);
+                readyQueue.add(p);
 
             } else {
-                arrivalProcess += p.getRemainingDuration();
-//                Map<Process, Integer> runningpr = new HashMap<>();
-//                runningpr.put(p, arrivalProcess);
-//                running.add(runningpr);
-
+                runningTime += p.getRemainingDuration();
             }
 
-            if (!listReady.contains(p)) {
-
-                p.setTurnarroundTime(arrivalProcess - p.getArrivalTime());
-                p.setWaitingTime(arrivalProcess - p.getArrivalTime() - p.getBrustTime());
-                p.setCompletionTime(arrivalProcess);
-                updateProcess(p);
-                Map<Process, Integer> runningpr = new HashMap<>();
-                runningpr.put(p, arrivalProcess);
-                running.add(runningpr);
-                returnTime += (arrivalProcess - p.getArrivalTime());
-                waitTime += (arrivalProcess - p.getArrivalTime() - p.getBrustTime());
+            if (!readyQueue.contains(p)) {
+                interruption.setTime(runningTime);
+                intrruptProcessor(interruption);
+                updateProcess(p, runningTime);
+                returnTime += (runningTime - p.getArrivalTime());
+                waitTime += (runningTime - p.getArrivalTime() - p.getBrustTime());
 
             }
         }
@@ -128,7 +113,12 @@ public class RoundRobin extends Scheduler {
         processes.forEach(process -> runningProcess.add(process));
     }
 
-    private void updateProcess(Process p) {
+    private void updateProcess(Process p, int runningTime) {
+
+        p.setTurnarroundTime(runningTime - p.getArrivalTime());
+        p.setWaitingTime(runningTime - p.getArrivalTime() - p.getBrustTime());
+        p.setCompletionTime(runningTime);
+
         int indexOfUpdatedProcess = -1;
         for (int i = 0; i < runningProcess.size(); i++) {
             if (runningProcess.get(i).getId() == p.getId()) {
@@ -140,8 +130,29 @@ public class RoundRobin extends Scheduler {
         }
     }
 
-    public List<Map<Process, Integer>> getRunning() {
-        return running;
+    public List<Interruption> getInterruptionList() {
+        return interruptionList;
+    }
+
+    private void intrruptProcessor(Interruption interruption) {
+        System.out.println(interruption);
+        interruptionList.add(interruption);
+    }
+
+    private int responseToProcess(Interruption interruption) {
+        // calc responseTime 
+        // if !existing add on map
+        int responseingTime = -1;
+
+        System.out.println(interruption.getProcess().getId());
+        System.out.println(interruption.hashCode());
+        if (!responseTimeList.contains(interruption)) {
+            Process process = interruption.getProcess();
+            responseingTime = interruption.getTime() - process.getArrivalTime();
+            System.out.println("responseingTime" + responseingTime);
+            responseTimeList.add(interruption);
+        }
+        return responseingTime;
     }
 
 }

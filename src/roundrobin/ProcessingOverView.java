@@ -21,6 +21,8 @@ import javax.swing.table.DefaultTableModel;
  */
 public class ProcessingOverView extends javax.swing.JFrame {
 
+    int firstIteration = 0;
+
     /**
      * Creates new form ProcessingOverView
      */
@@ -28,11 +30,11 @@ public class ProcessingOverView extends javax.swing.JFrame {
         initComponents();
         setLocationRelativeTo(null);
 
-//        processes.add(new Process(1, 0, 5));
-//        processes.add(new Process(2, 1, 3));
-//        processes.add(new Process(3, 2, 1));
-//        processes.add(new Process(4, 3, 2));
-//        processes.add(new Process(5, 4, 3));
+        processes.add(new Process(1, 0, 5));
+        processes.add(new Process(2, 1, 3));
+        processes.add(new Process(3, 2, 1));
+        processes.add(new Process(4, 3, 2));
+        processes.add(new Process(5, 4, 3));
         RoundRobin roundRobin = new RoundRobin(processes, quantum);
         roundRobin.print();
         processes = roundRobin.getRunningProcess();
@@ -53,27 +55,28 @@ public class ProcessingOverView extends javax.swing.JFrame {
         jLabelAverageTurnAround.setText(jLabelAverageTurnAround.getText() + " " + Math.round(roundRobin.getAvgReturn() * 100.0) / 100.0);
         jLabelAverageWaiting.setText(jLabelAverageWaiting.getText() + " " + Math.round(roundRobin.getAvgWait() * 100.0) / 100.0);
         jLabelAverageResponse.setText(jLabelAverageResponse.getText() + " " + Math.round(roundRobin.getAvgResponse() * 100.0) / 100.0);
-        roundRobin.getRunning().forEach((map) -> {
-            map.forEach((Process k, Integer v) -> {
-                JLabel startLable = new JLabel();
-                
-                if (roundRobin.getRunning().get(0).equals(map)) {
-                    startLable = new JLabel("" + k.getArrivalTime(),SwingConstants.LEFT);
-                }
-                JPanel jPanel = new JPanel(new GridLayout(0, 1, 0, 0));
-                JLabel jLabelProcess = new JLabel("p" + k.getId(), SwingConstants.CENTER);
-                jLabelProcess.setOpaque(true);
-                jLabelProcess.setBackground(Color.GREEN);
-                jLabelProcess.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
-                
-                JLabel jLabelTime = new JLabel("" + v, SwingConstants.RIGHT);
-                JPanel jPanelTime = new JPanel(new GridLayout(1, 0, 0, 0));
-                jPanelTime.add(startLable);
-                jPanelTime.add(jLabelTime);
-                jPanel.add(jLabelProcess);
-                jPanel.add(jPanelTime);
-                jPanelRunning.add(jPanel);
-            });
+
+        roundRobin.getInterruptionList().forEach((interruption) -> {
+
+            JLabel startLable = new JLabel();
+
+            if (firstIteration == 0) {
+                startLable = new JLabel("" + interruption.getProcess().getArrivalTime(), SwingConstants.LEFT);
+                firstIteration += 1;
+            }
+            JPanel jPanel = new JPanel(new GridLayout(0, 1, 0, 0));
+            JLabel jLabelProcess = new JLabel("p" + interruption.getProcess().getId(), SwingConstants.CENTER);
+            jLabelProcess.setOpaque(true);
+            jLabelProcess.setBackground(Color.GREEN);
+            jLabelProcess.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+
+            JLabel jLabelTime = new JLabel("" + interruption.getTime(), SwingConstants.RIGHT);
+            JPanel jPanelTime = new JPanel(new GridLayout(1, 0, 0, 0));
+            jPanelTime.add(startLable);
+            jPanelTime.add(jLabelTime);
+            jPanel.add(jLabelProcess);
+            jPanel.add(jPanelTime);
+            jPanelRunning.add(jPanel);
 
         }
         );
