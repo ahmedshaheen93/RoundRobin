@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package roundrobin;
+package roundrobin.gui;
 
+import roundrobin.model.Process;
 import java.awt.GridLayout;
 import java.util.Arrays;
 import javax.swing.JLabel;

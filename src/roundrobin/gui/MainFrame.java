@@ -1,4 +1,4 @@
-package roundrobin;
+package roundrobin.gui;
 
 import java.awt.event.KeyEvent;
 import javax.swing.*;

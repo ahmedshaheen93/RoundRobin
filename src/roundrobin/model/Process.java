@@ -1,4 +1,4 @@
-package roundrobin;
+package roundrobin.model;
 
 public class Process implements Comparable<Process> {
 

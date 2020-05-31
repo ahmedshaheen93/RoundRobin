@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package roundrobin;
+package roundrobin.gui;
 
+import roundrobin.model.Process;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
+import roundrobin.algorithm.RoundRobin;
 
 /**
  *
@@ -30,11 +32,11 @@ public class ProcessingOverView extends javax.swing.JFrame {
         initComponents();
         setLocationRelativeTo(null);
 
-        processes.add(new Process(1, 0, 5));
-        processes.add(new Process(2, 1, 3));
-        processes.add(new Process(3, 2, 1));
-        processes.add(new Process(4, 3, 2));
-        processes.add(new Process(5, 4, 3));
+//        processes.add(new Process(1, 0, 5));
+//        processes.add(new Process(2, 1, 3));
+//        processes.add(new Process(3, 2, 1));
+//        processes.add(new Process(4, 3, 2));
+//        processes.add(new Process(5, 4, 3));
         RoundRobin roundRobin = new RoundRobin(processes, quantum);
         roundRobin.print();
         processes = roundRobin.getRunningProcess();
@@ -52,7 +54,7 @@ public class ProcessingOverView extends javax.swing.JFrame {
         }
         jTable1.setModel(model);
 
-        jLabelAverageTurnAround.setText(jLabelAverageTurnAround.getText() + " " + Math.round(roundRobin.getAvgReturn() * 100.0) / 100.0);
+        jLabelAverageTurnAround.setText(jLabelAverageTurnAround.getText() + " " + Math.round(roundRobin.getAvgTurnAround() * 100.0) / 100.0);
         jLabelAverageWaiting.setText(jLabelAverageWaiting.getText() + " " + Math.round(roundRobin.getAvgWait() * 100.0) / 100.0);
         jLabelAverageResponse.setText(jLabelAverageResponse.getText() + " " + Math.round(roundRobin.getAvgResponse() * 100.0) / 100.0);
 
@@ -123,7 +125,7 @@ public class ProcessingOverView extends javax.swing.JFrame {
 
         jLabelAverageTurnAround.setText("Average turn Around time =");
 
-        jPanelRunning.setLayout(new java.awt.GridLayout());
+        jPanelRunning.setLayout(new java.awt.GridLayout(1, 0));
 
         jLabelAverageResponse.setText("Average Response time =");
 
