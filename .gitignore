@@ -1,0 +1,61 @@
+!**/src/main/**
+!**/src/test/**
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+nbproject/private/
+nbproject/
+nbproject/**
+nbbuild/
+nbbuild/**
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+manifest.mf
+build.xml
+
+### VS Code ###
+.vscode/
+
+# Maven
+log/
+target/
+hs_err_pid*
+target/**
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/MavenWrapperDownloader.java
+.mvn/wrapper/maven-wrapper.properties
+HELP.md
+mvnw
+mvnw.cmd
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
